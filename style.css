@@ -778,6 +778,17 @@ img {
   flex-wrap: wrap;
 }
 
+.contact-email-text,
+.contact-phone-text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.contact-email-text {
+  margin-top: 20px;
+}
+
 /* Footer */
 .footer {
   padding: 32px 0;

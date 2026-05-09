@@ -257,6 +257,9 @@ function applyLanguage(lang) {
   setTypewriter(lang)
   if (langToggle) langToggle.textContent = i18n[lang].lang
   document.documentElement.lang = lang
+  document.title = lang === 'es'
+    ? 'Carlos Barrios — FullStack Developer .NET / Angular & React'
+    : 'Carlos Barrios — FullStack Developer .NET / Angular & React'
 
   document.querySelectorAll('[data-reveal]').forEach((el) => {
     el.classList.remove('revealed')

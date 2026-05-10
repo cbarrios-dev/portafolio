@@ -37,7 +37,7 @@ const i18n = {
     'lang': 'EN',
   },
   en: {
-    'hero.greeting': 'Hi, I\'m',
+    'hero.greeting': "Hi, I'm",
     'hero.desc': '+10 years of experience in enterprise web application development. Specialist in <strong>ASP.NET (C#)</strong> backend + <strong>Angular / React</strong> frontend.',
     'hero.btnProjects': 'View Projects',
     'hero.btnContact': 'Contact Me',
@@ -62,7 +62,7 @@ const i18n = {
     'projects.title': 'Featured Projects',
     'experience.title': 'Experience',
     'contact.title': 'Get In Touch',
-    'contact.text': 'Have a project in mind or just want to connect? I\'m open to new opportunities. Don\'t hesitate to reach out!',
+    'contact.text': "Have a project in mind or just want to connect? I'm open to new opportunities. Don't hesitate to reach out!",
     'contact.btn': 'Contact Me',
     'nav.about': 'About',
     'nav.skills': 'Skills',
@@ -242,10 +242,25 @@ function updateStaticText(lang) {
   })
 }
 
+let titles = []
+let titleIndex = 0
+let typewriterRunning = false
+
 function setTypewriter(lang) {
   if (!typewriterEl) return
-  const titles = i18n[lang]['hero.titles']
-  typewriter(typewriterEl, titles[0])
+  titles = i18n[lang]['hero.titles']
+  titleIndex = 0
+  typewriter(typewriterEl, titles[0], () => {
+    setTimeout(cycleTitle, 2000)
+  })
+}
+
+function cycleTitle() {
+  if (!typewriterEl || titles.length <= 1) return
+  titleIndex = (titleIndex + 1) % titles.length
+  typewriter(typewriterEl, titles[titleIndex], () => {
+    setTimeout(cycleTitle, 2000)
+  })
 }
 
 function applyLanguage(lang) {
@@ -286,14 +301,18 @@ const navLinks = document.querySelector('.nav-links')
 
 hamburger?.addEventListener('click', () => {
   navLinks?.classList.toggle('open')
+  hamburger?.classList.toggle('active')
 })
 
 document.querySelectorAll('.nav-links a').forEach((link) => {
-  link.addEventListener('click', () => navLinks?.classList.remove('open'))
+  link.addEventListener('click', () => {
+    navLinks?.classList.remove('open')
+    hamburger?.classList.remove('active')
+  })
 })
 
 // --- Typewriter Effect ---
-function typewriter(element, text, speed = 60) {
+function typewriter(element, text, callback, speed = 55) {
   let i = 0
   element.innerHTML = ''
   const cursor = document.createElement('span')
@@ -305,6 +324,8 @@ function typewriter(element, text, speed = 60) {
       element.appendChild(cursor)
       i++
       setTimeout(type, speed + Math.random() * 40)
+    } else if (callback) {
+      setTimeout(callback, 500)
     }
   }
   type()
@@ -317,7 +338,7 @@ function animateCounter(el) {
   const target = parseInt(el.dataset.target)
   if (!target) return
   let current = 0
-  const duration = 1500
+  const duration = 1600
   const startTime = performance.now()
 
   function update(now) {
@@ -370,4 +391,59 @@ const header = document.querySelector('.header')
 
 window.addEventListener('scroll', () => {
   header?.classList.toggle('scrolled', window.scrollY > 50)
+})
+
+// --- Scroll Progress Bar ---
+const scrollProgress = document.getElementById('scrollProgress')
+
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+  if (scrollProgress) {
+    scrollProgress.style.width = progress + '%'
+  }
+})
+
+// --- Scroll Spy (active nav link) ---
+const navAnchors = document.querySelectorAll('[data-nav]')
+const sections = []
+
+navAnchors.forEach((a) => {
+  const href = a.getAttribute('href')
+  if (href && href.startsWith('#')) {
+    const el = document.querySelector(href)
+    if (el) sections.push({ el, link: a })
+  }
+})
+
+function updateActiveNav() {
+  const scrollY = window.scrollY + 120
+  let current = navAnchors[0]
+
+  sections.forEach(({ el, link }) => {
+    const top = el.offsetTop
+    const bottom = top + el.offsetHeight
+    if (scrollY >= top && scrollY < bottom) {
+      current = link
+    }
+  })
+
+  navAnchors.forEach((a) => a.classList.toggle('active', a === current))
+}
+
+window.addEventListener('scroll', updateActiveNav)
+updateActiveNav()
+
+// --- Hero Parallax (huge text) ---
+const heroHugeText = document.getElementById('heroHugeText')
+
+window.addEventListener('scroll', () => {
+  if (!heroHugeText) return
+  const rect = heroHugeText.closest('.hero').getBoundingClientRect()
+  const progress = 1 - (rect.top + rect.height) / (window.innerHeight + rect.height)
+  const translateY = progress * 40
+  const opacity = 1 - progress * 0.4
+  heroHugeText.style.transform = `translateY(${5 + translateY}%)`
+  heroHugeText.style.opacity = Math.max(0.01, opacity * 0.015)
 })
